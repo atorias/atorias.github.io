@@ -1,7 +1,113 @@
 # nginx
 
+## 需要阅读的文档
+
+[nginx](https://nginx.org/en/docs/)
+
+## nginx.service
+
 ```shell
- 原文地址:https://www.cnblogs.com/lidabo/p/4169396.html
+[Unit]
+Description=nginx
+After=network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/nginx/nginx.pid
+ExecStartPre=/usr/local/nginx/sbin/nginx -t
+ExecStart=/usr/local/nginx/sbin/nginx
+ExecReload=/usr/local/nginx/sbin/nginx -s reload
+ExecStop=/usr/local/nginx/sbin/nginx -s quit
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## 主要编译参数
+
+```shell
+# 默认安装位置
+--prefix=/usr/local/nginx
+```
+
+## nginx.conf
+
+```shell
+user       www www;  ## Default: nobody
+worker_processes  8;  ## cat /proc/cpuinfo|grep "cpu cores"|uniq
+error_log  logs/error.log;
+pid        /var/run/nginx/nginx.pid;
+worker_rlimit_nofile 8192;
+
+events {
+  worker_connections  4096;  ## Default: 1024
+}
+
+http {
+  include    conf/mime.types;
+  include    /etc/nginx/proxy.conf;
+  include    /etc/nginx/fastcgi.conf;
+  index    index.html index.htm index.php;
+
+  default_type application/octet-stream;
+  log_format   main '$remote_addr - $remote_user [$time_local]  $status '
+    '"$request" $body_bytes_sent "$http_referer" '
+    '"$http_user_agent" "$http_x_forwarded_for"';
+  access_log   logs/access.log  main;
+  sendfile     on;
+  tcp_nopush   on;
+  server_names_hash_bucket_size 128; # this seems to be required for some vhosts
+
+  server { # php/fastcgi
+    listen       80;
+    server_name  domain1.com www.domain1.com;
+    access_log   logs/domain1.access.log  main;
+    root         html;
+
+    location ~ \.php$ {
+      fastcgi_pass   127.0.0.1:1025;
+    }
+  }
+
+  server { # simple reverse-proxy
+    listen       80;
+    server_name  domain2.com www.domain2.com;
+    access_log   logs/domain2.access.log  main;
+
+    # serve static files
+    location ~ ^/(images|javascript|js|css|flash|media|static)/  {
+      root    /var/www/virtual/big.server.com/htdocs;
+      expires 30d;
+    }
+
+    # pass requests for dynamic content to rails/turbogears/zope, et al
+    location / {
+      proxy_pass      http://127.0.0.1:8080;
+    }
+  }
+
+  upstream big_server_com {
+    server 127.0.0.3:8000 weight=5;
+    server 127.0.0.3:8001 weight=5;
+    server 192.168.0.1:8000;
+    server 192.168.0.1:8001;
+  }
+
+  server { # simple load balancing
+    listen          80;
+    server_name     big.server.com;
+    access_log      logs/big.server.access.log main;
+
+    location / {
+      proxy_pass      http://big_server_com;
+    }
+  }
+}
+```
+
+```shell
+ 原文地址:<https://www.cnblogs.com/lidabo/p/4169396.html>
  关于一些对location认识的误区
  1、 location 的匹配顺序是“先匹配正则，再匹配普通”。
 
@@ -14,7 +120,7 @@
  总结一句话： “正则 location 匹配让步普通 location 的严格精确匹配结果；但覆盖普通 location 的最大前缀匹配结果”
 
  官方文档解释
- REFER: http://wiki.nginx.org/NginxHttpCoreModule#location
+ REFER: <http://wiki.nginx.org/NginxHttpCoreModule#location>
 
  location
 
@@ -62,7 +168,7 @@
 
  除了上文的“^~ ”可以阻止继续搜索正则location 外，你还可以加“= ”。那么如果“^~ ”和“= ”都能阻止继续搜索正则location 的话，那它们之间有什么区别呢？区别很简单，共同点是它们都能阻止继续搜索正则location ，不同点是“^~ ”依然遵守“最大前缀”匹配规则，然而“= ”不是“最大前缀”，而是必须是严格匹配（exact match ）。
 
- 这里顺便讲下“location / {} ”和“location = / {} ”的区别，“location / {} ”遵守普通location 的最大前缀匹配，由于任何URI 都必然以“/ ”根开头，所以对于一个URI ，如果有更specific 的匹配，那自然是选这个更specific 的，如果没有，“/ ”一定能为这个URI 垫背（至少能匹配到“/ ”），也就是说“location / {} ”有点默认配置的味道，其他更specific的配置能覆盖overwrite 这个默认配置（这也是为什么我们总能看到location / {} 这个配置的一个很重要的原因）。而“location = / {} ”遵守的是“严格精确匹配exact match ”，也就是只能匹配 http://host:port/ 请求，同时会禁止继续搜索正则location 。因此如果我们只想对“GET / ”请求配置作用指令，那么我们可以选“location = / {} ”这样能减少正则location 的搜索，因此效率比“location / {}” 高（注：前提是我们的目的仅仅只想对“GET / ”起作用）。
+ 这里顺便讲下“location / {} ”和“location = / {} ”的区别，“location / {} ”遵守普通location 的最大前缀匹配，由于任何URI 都必然以“/ ”根开头，所以对于一个URI ，如果有更specific 的匹配，那自然是选这个更specific 的，如果没有，“/ ”一定能为这个URI 垫背（至少能匹配到“/ ”），也就是说“location / {} ”有点默认配置的味道，其他更specific的配置能覆盖overwrite 这个默认配置（这也是为什么我们总能看到location / {} 这个配置的一个很重要的原因）。而“location = / {} ”遵守的是“严格精确匹配exact match ”，也就是只能匹配 <http://host:port/> 请求，同时会禁止继续搜索正则location 。因此如果我们只想对“GET / ”请求配置作用指令，那么我们可以选“location = / {} ”这样能减少正则location 的搜索，因此效率比“location / {}” 高（注：前提是我们的目的仅仅只想对“GET / ”起作用）。
 
  On exact match with literal location without “=” or “^~” prefixes search is also immediately terminated.
 
@@ -86,7 +192,7 @@
 
  location = / {
 
- # matches the query / only.
+# matches the query / only
 
  [ configuration A ]
 
@@ -94,11 +200,11 @@
 
  location / {
 
- # matches any query, since all queries begin with /, but regular
+# matches any query, since all queries begin with /, but regular
 
- # expressions and any longer conventional blocks will be
+# expressions and any longer conventional blocks will be
 
- # matched first.
+# matched first
 
  [ configuration B ]
 
@@ -106,9 +212,9 @@
 
  location ^~ /images/ {
 
- # matches any query beginning with /images/ and halts searching,
+# matches any query beginning with /images/ and halts searching
 
- # so regular expressions will not be checked.
+# so regular expressions will not be checked
 
  [ configuration C ]
 
@@ -116,11 +222,11 @@
 
  location ~* \.(gif|jpg|jpeg)$ {
 
- # matches any request ending in gif, jpg, or jpeg. However, all
+# matches any request ending in gif, jpg, or jpeg. However, all
 
- # requests to the /images/ directory will be handled by
+# requests to the /images/ directory will be handled by
 
- # Configuration C.
+# Configuration C
 
  [ configuration D ]
 
@@ -147,7 +253,7 @@
  文章开始说了location 的语法中，可以有“= ”，“^~ ”，“~ ”和“~* ”前缀，或者干脆没有任何前缀，还有“@ ”前缀，但是后面的分析我们始终没有谈到“@ ”前缀。文章最后点内容，介绍了“＠”的用途：“@ ”是用来定义“Named Location ”的（你可以理解为独立于“普通location （location using literal strings ）”和“正则location （location using regular expressions ）”之外的第三种类型），这种“Named Location ”不是用来处理普通的HTTP 请求的，它是专门用来处理“内部重定向（internally redirected ）”请求的。注意：这里说的“内部重定向（internally redirected ）”或许说成“forward ”会好点，以为内internally redirected 是不需要跟浏览器交互的，纯粹是服务端的一个转发行为。
 
  安装Nginx
- wget http://nginx.org/download/nginx-1.4.6.tar.gz
+ wget <http://nginx.org/download/nginx-1.4.6.tar.gz>
 
  tar zxvf nginx-1.1.0.tar.gz
 
@@ -169,7 +275,7 @@
 
  statically from the source with nginx by using –with-pcre=<path> option.
 
-   解决办法： http://apps.hi.baidu.com/share/detail/34331473
+   解决办法： <http://apps.hi.baidu.com/share/detail/34331473>
 
    先执行： yum -y install pcre-devel openssl openssl-devel 把依赖的东西安装上。
 
@@ -218,7 +324,7 @@
 
    测试结果：
 
-   [root@web108 ~]# curl http://localhost:9090/
+   [root@web108 ~]# curl <http://localhost:9090/>
 
    <html>
 
@@ -239,7 +345,7 @@
 
    </html>
 
-   [root@web108 ~]# curl http://localhost:9090/index.html
+   [root@web108 ~]# curl <http://localhost:9090/index.html>
 
    <html>
 
@@ -259,7 +365,7 @@
 
    </html>
 
-   [root@web108 ~]# curl http://localhost:9090/index_notfound.html
+   [root@web108 ~]# curl <http://localhost:9090/index_notfound.html>
 
    <html>
 
@@ -285,19 +391,19 @@
    测试结果如下：
 
    URI 请求 HTTP 响应
-   curl http://localhost:9090/ 403 Forbidden
-   curl http://localhost:9090/index.html Welcome to nginx!
-   curl http://localhost:9090/index_notfound.html 404 Not Found
+   curl <http://localhost:9090/> 403 Forbidden
+   curl <http://localhost:9090/index.html> Welcome to nginx!
+   curl <http://localhost:9090/index_notfound.html> 404 Not Found
 
-   curl http://localhost:9090/ 的结果是“ 403 Forbidden ”，说明被匹配到“ location / {..deny all;} ”了，原因很简单HTTP 请求 GET / 被“严格精确”匹配到了普通 location / {} ，则会停止搜索正则 location ；
+   curl <http://localhost:9090/> 的结果是“ 403 Forbidden ”，说明被匹配到“ location / {..deny all;} ”了，原因很简单HTTP 请求 GET / 被“严格精确”匹配到了普通 location / {} ，则会停止搜索正则 location ；
 
-   curl http://localhost:9090/index.html 结果是“ Welcome to nginx! ”，说明没有被“ location / {…deny all;} ”匹配，否则会 403 Forbidden ，但 /index.html 的确也是以“ / ”开头的，只不过此时的普通 location / 的匹配结果是“最大前缀”匹配，所以 Nginx 会继续搜索正则 location ， location ~ \.html$ 表达了以 .html 结尾的都 allow all; 于是接着就访问到了实际存在的 index.html 页面。
+   curl <http://localhost:9090/index.html> 结果是“ Welcome to nginx! ”，说明没有被“ location / {…deny all;} ”匹配，否则会 403 Forbidden ，但 /index.html 的确也是以“ / ”开头的，只不过此时的普通 location / 的匹配结果是“最大前缀”匹配，所以 Nginx 会继续搜索正则 location ， location ~ \.html$ 表达了以 .html 结尾的都 allow all; 于是接着就访问到了实际存在的 index.html 页面。
 
-   curl http://localhost:9090/index_notfound.html 同样的道理先匹配 location / {} ，但属于“普通 location 的最大前缀匹配”，于是后面被“正则 location ” location ~ \.html$ {} 覆盖了，最终 allow all ； 但的确目录下不存在index_notfound.html 页面，于是 404 Not Found 。
+   curl <http://localhost:9090/index_notfound.html> 同样的道理先匹配 location / {} ，但属于“普通 location 的最大前缀匹配”，于是后面被“正则 location ” location ~ \.html$ {} 覆盖了，最终 allow all ； 但的确目录下不存在index_notfound.html 页面，于是 404 Not Found 。
 
-   如果此时我们访问 http://localhost:9090/index.txt 会是什么结果呢？显然是 deny all ；因为先匹配上了 location / {..deny all;} 尽管属于“普通 location ”的最大前缀匹配结果，继续搜索正则 location ，但是 /index.txt 不是以 .html结尾的，正则 location 失败，最终采纳普通 location 的最大前缀匹配结果，于是 deny all 了。
+   如果此时我们访问 <http://localhost:9090/index.txt> 会是什么结果呢？显然是 deny all ；因为先匹配上了 location / {..deny all;} 尽管属于“普通 location ”的最大前缀匹配结果，继续搜索正则 location ，但是 /index.txt 不是以 .html结尾的，正则 location 失败，最终采纳普通 location 的最大前缀匹配结果，于是 deny all 了。
 
-   [root@web108 ~]# curl http://localhost:9090/index.txt
+   [root@web108 ~]# curl <http://localhost:9090/index.txt>
 
    <html>
 
@@ -355,7 +461,7 @@
 
    测试请求：
 
-   [root@web108 ~]# curl http://localhost:9090/exact/match.html
+   [root@web108 ~]# curl <http://localhost:9090/exact/match.html>
 
    <html>
 
@@ -418,10 +524,10 @@
    把例题 2 中的 location / {} 修改成 location ^~ / {} ，再看看测试结果：
 
    URI 请求 修改前 修改后
-   curl http://localhost:9090/ 403 Forbidden 403 Forbidden
-   curl http://localhost:9090/index.html Welcome to nginx! 403 Forbidden
-   curl http://localhost:9090/index_notfound.html 404 Not Found 403 Forbidden
-   curl http://localhost:9090/exact/match.html 404 Not Found 404 Not Found
+   curl <http://localhost:9090/> 403 Forbidden 403 Forbidden
+   curl <http://localhost:9090/index.html> Welcome to nginx! 403 Forbidden
+   curl <http://localhost:9090/index_notfound.html> 404 Not Found 403 Forbidden
+   curl <http://localhost:9090/exact/match.html> 404 Not Found 404 Not Found
 
    除了 GET /exact/match.html 是 404 Not Found ，其余都是 403 Forbidden ，原因很简单所有请求都是以“ / ”开头，所以所有请求都能匹配上“ / ”普通 location ，但普通 location 的匹配原则是“最大前缀”，所以只有/exact/match.html 匹配到 location /exact/match.html {allow all;} ，其余都 location ^~ / {deny all;} 并终止正则搜索。
 
@@ -460,11 +566,11 @@
    例题 4 相对例题 2 把 location / {} 修改成了 location = / {} ，再次测试结果：
 
    URI 请求 修改前 修改后
-   curl http://localhost:9090/ 403 Forbidden 403 Forbidden
-   curl http://localhost:9090/index.html Welcome to nginx! Welcome to nginx!
-   curl http://localhost:9090/index_notfound.html 404 Not Found 404 Not Found
-   curl http://localhost:9090/exact/match.html 404 Not Found 404 Not Found
-   curl http://localhost:9090/test.jsp 403 Forbidden 404 Not Found
+   curl <http://localhost:9090/> 403 Forbidden 403 Forbidden
+   curl <http://localhost:9090/index.html> Welcome to nginx! Welcome to nginx!
+   curl <http://localhost:9090/index_notfound.html> 404 Not Found 404 Not Found
+   curl <http://localhost:9090/exact/match.html> 404 Not Found 404 Not Found
+   curl <http://localhost:9090/test.jsp> 403 Forbidden 404 Not Found
 
    最能说明问题的测试是 GET /test.jsp ，实际上 /test.jsp 没有匹配正则 location （ location ~\.html$ ），也没有匹配 location = / {} ，如果按照 location / {} 的话，会“最大前缀”匹配到普通 location / {} ，结果是 deny all 。
 
@@ -518,8 +624,8 @@
    测试结果：
 
    URI 请求 配置 3.1 配置 3.2
-   curl http://localhost:9090/regextest.html 404 Not Found 404 Not Found
-   curl http://localhost:9090/prefix/regextest.html 404 Not Found 403 Forbidden
+   curl <http://localhost:9090/regextest.html> 404 Not Found 404 Not Found
+   curl <http://localhost:9090/prefix/regextest.html> 404 Not Found 403 Forbidden
 
    解释：
 
@@ -574,13 +680,13 @@
    测试结果：
 
    URI 请求 配置 3.1 配置 3.2
-   curl http://localhost:9090/prefix/t.html 403 Forbidden 403 Forbidden
-   curl http://localhost:9090/prefix/mid/t.html 404 Not Found 404 Not Found
+   curl <http://localhost:9090/prefix/t.html> 403 Forbidden 403 Forbidden
+   curl <http://localhost:9090/prefix/mid/t.html> 404 Not Found 404 Not Found
 
    测试结果表明：普通 location 的匹配规则是“最大前缀”匹配，而且与编辑顺序无关。
 
    #5 “@” 前缀 Named Location 使用
-   REFER: http://wiki.nginx.org/HttpCoreModule#error_page
+   REFER: <http://wiki.nginx.org/HttpCoreModule#error_page>
 
    假设配置如下：
 
@@ -600,13 +706,13 @@
 
    }
 
-   #error_page 404 http://www.baidu.com # 直接这样是不允许的
+   #error_page 404 <http://www.baidu.com> # 直接这样是不允许的
 
    error_page 404 = @fallback;
 
    location @fallback {
 
-   proxy_pass http://www.baidu.com;
+   proxy_pass <http://www.baidu.com>;
 
    }
 
@@ -616,7 +722,7 @@
 
    测试一：
 
-   [root@web108 ~]# curl http://localhost:9090/nofound.html -i
+   [root@web108 ~]# curl <http://localhost:9090/nofound.html> -i
 
    HTTP/1.1 302 Found
 
@@ -626,7 +732,7 @@
 
    Content-Type: text/html; charset=iso-8859-1
 
-   Location: http://localhost:9090/search/error.html
+   Location: <http://localhost:9090/search/error.html>
 
    Connection: keep-alive
 
@@ -658,11 +764,11 @@
 
    [root@web108 ~]#
 
-   当我们 GET /nofound.html 发送给本 nginx ， nginx 找不到对应的页面，于是 error_page 404 = @fallback ，请求被代理到 http://www.baidu.com ，于是 nginx 给 http://www.baidu.com 发送了 GET /nofound.html ，但/nofound.html 页面在百度也不存在，百度 302 跳转到错误页。
+   当我们 GET /nofound.html 发送给本 nginx ， nginx 找不到对应的页面，于是 error_page 404 = @fallback ，请求被代理到 <http://www.baidu.com> ，于是 nginx 给 <http://www.baidu.com> 发送了 GET /nofound.html ，但/nofound.html 页面在百度也不存在，百度 302 跳转到错误页。
 
-   直接访问 http://www.baidu.com/nofound.html 结果：
+   直接访问 <http://www.baidu.com/nofound.html> 结果：
 
-   [root@web108 ~]# curl http://www.baidu.com/nofound.html -i
+   [root@web108 ~]# curl <http://www.baidu.com/nofound.html> -i
 
    HTTP/1.1 302 Found
 
@@ -670,7 +776,7 @@
 
    Server: Apache
 
-   Location: http://www.baidu.com/search/error.html
+   Location: <http://www.baidu.com/search/error.html>
 
    Cache-Control: max-age=86400
 
@@ -706,7 +812,7 @@
 
    测试二：访问一个 nginx 不存在，但 baidu 存在的页面
 
-   [root@web108 ~]# curl http://www.baidu.com/duty/ -i
+   [root@web108 ~]# curl <http://www.baidu.com/duty/> -i
 
    HTTP/1.1 200 OK
 
@@ -750,7 +856,7 @@
 
    显示，的确百度这个页面是存在的。
 
-   [root@web108 ~]# curl http://localhost:9090/duty/ -i
+   [root@web108 ~]# curl <http://localhost:9090/duty/> -i
 
    HTTP/1.1 200 OK
 
@@ -794,5 +900,5 @@
 
    </html>
 
-   当 curl http://localhost:9090/duty/ -i 时， nginx 没找到对应的页面，于是 error_page = @fallback ，把请求代理到 baidu.com 。注意这里的 error_page = @fallback 不是靠重定向实现的，而是所说的“ internally redirected （forward ）”。
+   当 curl <http://localhost:9090/duty/> -i 时， nginx 没找到对应的页面，于是 error_page = @fallback ，把请求代理到 baidu.com 。注意这里的 error_page = @fallback 不是靠重定向实现的，而是所说的“ internally redirected （forward ）”。
 ```

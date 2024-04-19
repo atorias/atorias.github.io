@@ -87,3 +87,12 @@ networks:
   backend:
 
 ```
+
+## 容器制作成镜像
+
+```shell
+# 查看容器
+docker ps -a
+# 容器->镜像
+docker commit -a "author_name" -m "description" container_id imagename:tag
+```
