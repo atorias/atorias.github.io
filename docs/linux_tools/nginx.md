@@ -118,7 +118,7 @@ http {
 | ~*        | 正则 | 正则     | 大小写不敏感                     |
 | =         | 普通 | 严格匹配 | 匹配到就直接结束                 |
 | /a/b      | 普通 | 最大匹配 | 匹配到以后，还要跟正则battle     |
-| /a/b.html | 普通 | 严格撇屁 | 匹配到以后就直接结束             |
+| /a/b.html | 普通 | 严格匹配 | 匹配到以后就直接结束             |
 | ^~        | 普通 | 最大匹配 | 普通匹配直接battle获胜，直接结束 |
 
 引用文档 [Nginx之location匹配规则详解]([https://](https://www.cnblogs.com/lidabo/p/4169396.html))  
@@ -126,6 +126,7 @@ http {
 * 首先匹配普通location
 * 当location指定了`^~`，则不继续匹配正则
 * 当location`=`严格匹配上，则不继续匹配正则
+* 当location`/a/b/c.html`正好匹配上，则不继续匹配正则
 * 正则location顺序匹配，且只要匹配到第一个就停止后面的匹配
 
 总结: 正则location匹配让步普通location的严格精确匹配结果；但覆盖普通location的最大前缀匹配结果  
