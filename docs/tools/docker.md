@@ -1,5 +1,29 @@
 # docker
 
+## mongodb
+
+```docker
+docker run --name mongodb -d --privileged=true 
+--restart=always
+-v C:\\Users\\Administrator\\Desktop\\docker_data\\mongo\\data:/data/db
+-v C:\\Users\\Administrator\\Desktop\\docker_data\\mongo\\logs:/data/logs/
+-p 27017:27017
+-e MONGO_INITDB_ROOT_USERNAME=root
+-e MONGO_INITDB_ROOT_PASSWORD=root
+mongo:latest 
+```
+
+## mssql
+
+```docker
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=<YourStrong@Passw0rd>" 
+-v C:\Users\Administrator\Desktop\docker_data\mssql:/var/opt/mssql/data 
+-p 13199:1433 
+--name sql1 
+--hostname sql1 
+-d mcr.microsoft.com/mssql/server:2022-latest
+```
+
 ## redis7.2
 
 使用 [配置文件](./redis.conf)
