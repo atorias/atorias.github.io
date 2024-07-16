@@ -1,6 +1,34 @@
 # docker
 
-## mongodb
+## install
+
+```shell
+# 更新依赖
+sudo apt-get update
+# 下载证书
+curl -o /etc/apt/keyrings/docker-ce.gpg http://mirrors.aliyun.com/docker-ce/linux/ubuntu/gpg
+# 添加镜像源
+add-apt-repository "deb [arch=amd64] http://mirrors.aliyun.com/docker-ce/linux/ubuntu $(lsb_release -cs) stable"
+# 安装
+apt-get install docker-ce docker-ce-cli containerd.io
+# 添加国内仓库
+vim /etc/docker/daemon.json
+{
+  "registry-mirrors" :
+    [
+      "https://docker.m.daocloud.io",
+      "https://noohub.ru",
+      "https://huecker.io",
+      "https://dockerhub.timeweb.cloud"
+    ]
+}
+systemctl start docker
+systemctl enable docker
+```
+
+## 实例
+
+### mongodb
 
 ```docker
 docker run --name mongodb -d --privileged=true 
@@ -13,7 +41,7 @@ docker run --name mongodb -d --privileged=true
 mongo:latest 
 ```
 
-## mssql
+### mssql
 
 ```docker
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=<YourStrong@Passw0rd>" 
@@ -24,7 +52,7 @@ docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=<YourStrong@Passw0rd>"
 -d mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-## redis7.2
+### redis7.2
 
 使用 [配置文件](./redis.conf)
 
@@ -37,7 +65,7 @@ docker run -p 6379:6379 --name redis72
 --appendonly yes
 ```
 
-## mysql
+### mysql
 
 ```docker
 docker run -p 3306:3306 --name mysql8.3.0 
@@ -49,7 +77,7 @@ docker run -p 3306:3306 --name mysql8.3.0
 -d mysql:latest
 ```
 
-## ubuntu 20.04
+### ubuntu 20.04
 
 image `ecpe4s/ubuntu20.04:latest`
 
@@ -57,7 +85,7 @@ image `ecpe4s/ubuntu20.04:latest`
 docker  run -it  --name ubuntu20.04 ecpe4s/ubuntu20.04:latest
 ```
 
-## centos
+### centos
 
 ```shell
 # 创建网络
@@ -68,7 +96,7 @@ docker run --privileged=true -it --name xxx -v xxx:xxx --network atlas imagename
 docker commit container_id imagename:tag
 ```
 
-## docker-compose.yaml
+### docker-compose.yaml
 
 ```shell
 version: "3.8"
