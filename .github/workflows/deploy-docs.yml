@@ -26,5 +26,5 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           TARGET_REPO: https://github.com/atorias/docs.git
           TARGET_BRANCH: main
-          BUILD_SCRIPT: pnpm docs:build
+          BUILD_SCRIPT: npm docs:build
           BUILD_DIR: docs/.vuepress/dist
