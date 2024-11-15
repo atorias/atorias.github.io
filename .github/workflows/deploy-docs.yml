@@ -34,7 +34,7 @@ jobs:
         run: yarn run docs:build
 
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@latest
+        uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: main
