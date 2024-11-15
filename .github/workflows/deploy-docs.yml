@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@latest
         with:
           persist-credentials: false
 
-      - uses: actions/cache@v2.1.4
+      - uses: actions/cache@latest
         id: node-modules
         with:
           path: node_modules/
@@ -34,7 +34,7 @@ jobs:
         run: yarn run docs:build
 
       - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.2.0
+        uses: JamesIves/github-pages-deploy-action@latest
         with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: main
