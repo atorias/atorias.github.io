@@ -6,7 +6,7 @@ export default defineUserConfig({
   lang: 'zh-CN',
 
   title: 'Demilich\’ docs',
-  description: '记录一些日常开发的文档',
+  description: '记录一些日常开发的文档,woo!',
 
   theme: defaultTheme({
     logo: 'https://vuejs.press/images/hero.png',
