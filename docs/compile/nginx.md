@@ -22,5 +22,5 @@ cd nginx
 
 make && make install
 ln -s /usr/local/nginx/sbin/nginx /usr/bin/nginx
-nginx -V
+nginx -V 
 ```
