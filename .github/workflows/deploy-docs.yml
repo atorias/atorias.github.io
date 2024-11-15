@@ -1,30 +1,42 @@
+name: Deploy GitHub Pages
 
-name: 部署文档
-
+# 触发条件：在 push 到 main 分支后
 on:
   push:
     branches:
-      # 确保这是你正在使用的分支名称
       - main
-
-permissions:
-  contents: write
-
+  pull_request:
+    branches:
+      - main
+# 任务
 jobs:
-  deploy-gh-pages:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
         with:
-          fetch-depth: 0
-          # 如果你文档需要 Git 子模块，取消注释下一行
-          # submodules: true
-      - name: vuepress-deploy
-        uses: jenkey2011/vuepress-deploy@master
-        env:
+          persist-credentials: false
+
+      - uses: actions/cache@v2.1.4
+        id: node-modules
+        with:
+          path: node_modules/
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install Deps
+        if: steps.node-modules.outputs.cache-hit != 'true'
+        run: yarn install --frozen-lockfile
+
+      - name: Build Template
+        run: yarn run docs:build
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.2.0
+        with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          TARGET_REPO: https://github.com/atorias/docs.git
-          TARGET_BRANCH: main
-          BUILD_SCRIPT: npm run docs:build
-          BUILD_DIR: docs/.vuepress/dist
+          BRANCH: main
+          # 部署目录为 VuePress 的默认输出目录
+          FOLDER: docs/.vuepress/dist
