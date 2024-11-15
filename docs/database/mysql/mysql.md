@@ -22,6 +22,23 @@ grant select, show view ,trigger ,event ,lock tables, process, reload, replicati
 flush privileges; 
 ```
 
+## 备份脚本
+
+```shell
+#!/bin/bash
+date=$(date +%Y%m%d%H%M%S)
+backuppath=/data/mysql-backup
+dbhost=localhost
+dbuser=backup
+dbpasswd=9¬6QÙcãËCyOcÓaf«UÕæ6r×îìåð·çDBÔ3
+time=30
+if [ ! -d "$backuppath" ]; then
+    mkdir -p "$backuppath" && echo "备份目录创建成功!" || { echo "目录创建失败！"; exit 1; }
+fi
+mysqldump -h$dbhost -u$dbuser -p$dbpasswd --all-databases | gzip > "$backuppath/$date.sql.gz" || { echo "备份失败！"; exit 1; }
+find $backuppath -type f -name "*.sql.gz" -mtime +$time -exec rm -f {} \;
+```
+
 ### mysql忘记密码
 
 ```shell
