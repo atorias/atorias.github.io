@@ -7,6 +7,7 @@ export default defineUserConfig({
 
   title: 'Demilich\’ docs',
   description: '记录一些日常开发的文档,woo!',
+  base: '/',
 
   theme: defaultTheme({
     logo: 'https://vuejs.press/images/hero.png',
