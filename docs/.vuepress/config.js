@@ -49,7 +49,6 @@ export default defineUserConfig({
       {
         text: '编译安装',
         children: [
-          '/compile/nginx',
           '/compile/openssh',
           '/compile/openssl',
           '/compile/zlib'

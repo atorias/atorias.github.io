@@ -39,7 +39,7 @@ mysqldump -h$dbhost -u$dbuser -p$dbpasswd --all-databases | gzip > "$backuppath/
 find $backuppath -type f -name "*.sql.gz" -mtime +$time -exec rm -f {} \;
 ```
 
-### mysql忘记密码
+## mysql忘记密码
 
 ```shell
     01. my.cnf 添加skip-grant-tables 
@@ -51,7 +51,7 @@ find $backuppath -type f -name "*.sql.gz" -mtime +$time -exec rm -f {} \;
     7.去掉skip-grant-tables
 ```
 
-### yum安装mysql8.0
+## yum安装mysql8.0
 
 ```shell
     01.  wget https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm
@@ -66,6 +66,22 @@ find $backuppath -type f -name "*.sql.gz" -mtime +$time -exec rm -f {} \;
     11.  mysql -uroot -p
     12.  alter user 'root'@'localhost' identified by '&?Á9:Ò])Û¡;ôØîÁõi´©|uï£±ö¡Yxrìyz'
     13.  flush privileges;
+```
+
+## 安装mysql
+
+### 可执行文件安装
+
+```shell
+ldd version # 确定用的是2.28还是其他版本
+https://dev.mysql.com/downloads/mysql/ # 下载地址 linux-Generic 可直接安装, source code 编译安装
+tar -xvf filename.tar.xz # 解压
+mv mysql  /usr/local/mysql
+cd /usr/local/mysql/
+mkdir data
+chown -R mysql.mysql /usr/local/mysql/
+bin/mysqld --initialize --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
+https://blog.csdn.net/huaz_md/article/details/138427557
 ```
 
 ### ubuntu 编译
