@@ -24,3 +24,8 @@
     netsh winhttp reset proxy
     查看代理
     netsh winhttp show proxy
+
+## 无限延长更新时间
+
+计算机\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings
+FlightSettingsMaxPauseDays DWORD32 十进制7000
