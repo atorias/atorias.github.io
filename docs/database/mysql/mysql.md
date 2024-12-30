@@ -60,6 +60,7 @@ find $backuppath -type f -name "*.sql.gz" -mtime +$time -exec rm -f {} \;
     04.  yum makecache
     05.  groupadd mysql
     06.  useradd -g mysql mysql
+    rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2023
     07.  yum install mysql-community-server
     09.  systemctl start mysqld
     10.  cat /var/log/mysqld.log | grep password
