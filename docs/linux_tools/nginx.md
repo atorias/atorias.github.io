@@ -24,6 +24,7 @@ cd nginx
 
 make && make install
 ln -s /usr/local/nginx/sbin/nginx /usr/bin/nginx
+mkdir -p /var/temp/nginx/client
 nginx -V
 ```
 
@@ -32,6 +33,9 @@ nginx -V
 [nginx](https://nginx.org/en/docs/)
 
 ## nginx.service
+
+vim /lib/systemd/system/nginx.service
+systemctl enable /lib/systemd/system/nginx.service
 
 ```shell
 [Unit]
