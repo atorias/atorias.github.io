@@ -28,6 +28,52 @@ mkdir -p /var/temp/nginx/client
 nginx -V
 ```
 
+## server 配置
+
+```shell
+server {
+    listen 80;
+    listen 443 ssl;
+
+    ssl_certificate /etc/nginx/ssl/xinlantech.cn.pem;
+    ssl_certificate_key /etc/nginx/ssl/xinlantech.cn.key;
+
+    server_name api.xinlantech.cn;
+
+    client_max_body_size 50M;
+
+    location / {
+        root /data/www/;
+        index index.html;
+    }
+
+    location /static/ {
+        alias /data/www/;
+        index index.html;
+    }
+
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}
+
+location /12001/ {
+    add_header 'Access-Control-Allow-Origin' $http_origin;
+    add_header 'Access-Control-Allow-Headers' '*';
+    add_header 'Access-Control-Allow-Credentials' 'true';
+    add_header 'Access-Control-Allow-Methods' '*';
+
+    if ($request_method = 'OPTIONS') {
+        return 204;
+    }
+
+    proxy_pass http://127.0.0.1:12001/;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto &scheme;
+}
+```
+
 ## 需要阅读的文档
 
 [nginx](https://nginx.org/en/docs/)

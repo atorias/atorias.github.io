@@ -60,6 +60,7 @@ export default defineUserConfig({
           '/linux_tools/firewalld',
           '/linux_tools/nginx',
           '/linux_tools/systemctl',
+          '/linux_tools/redis',
         ]
       },
       {
