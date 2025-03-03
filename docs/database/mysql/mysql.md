@@ -71,6 +71,27 @@ find $backuppath -type f -name "*.sql.gz" -mtime +$time -exec rm -f {} \;
 
 ## 安装mysql
 
+### dpkg安装
+
+```shell
+https://dev.mysql.com/downloads/mysql/
+选择对应版本，ubuntu linux， 对应OS version
+下载 (mysql-server_8.4.4-1ubuntu22.04_amd64.deb-bundle.tar)
+tar -xvf (mysql-server_8.4.4-1ubuntu22.04_amd64.deb-bundle.tar) 
+dpkg -i *.deb
+
+如果有问题 
+sudo apt --fix-broken install -y
+sudo apt clean
+sudo apt autoclean
+sudo apt autoremove -y
+
+然后继续
+修改密码
+ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '你的密码';
+
+```
+
 ### 可执行文件安装
 
 ```shell
