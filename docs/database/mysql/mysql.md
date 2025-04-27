@@ -97,14 +97,99 @@ ALTER USER 'root'@'localhost' IDENTIFIED WITH caching_sha2_password BY '你的�
 ```shell
 ldd version # 确定用的是2.28还是其他版本
 https://dev.mysql.com/downloads/mysql/ # 下载地址 linux-Generic 可直接安装, source code 编译安装
+groupadd mysql
+useradd -g mysql mysql
 tar -xvf filename.tar.xz # 解压
 mv mysql  /usr/local/mysql
 cd /usr/local/mysql/
 mkdir data
+mkdir temp
+mkdir log
+touch log/error.log
 chown -R mysql.mysql /usr/local/mysql/
-bin/mysqld --initialize --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
-https://blog.csdn.net/huaz_md/article/details/138427557
+chmod -R 0750 /usr/local/mysql/
+
+./bin/mysqld --initialize --console --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data --log-error=/usr/local/mysql/log/error.log
+
+touch /usr/local/mysql/my.cnf
+ln -s /usr/local/mysql/my.cnf /etc/my.cnf
 ```
+
+my.cnf配置
+
+```shell
+[mysql]
+#设置mysql客户端默认字符集
+default-character-set=utf8mb4
+
+[mysqld]
+# sql_mode=NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO
+user=mysql
+skip-name-resolve
+
+#设置3306端口
+port = 3306
+
+#缓存配置
+tmp_table_size=1024M
+max_heap_table_size=1024M
+
+#设置mysql的安装目录
+basedir=/usr/local/mysql
+#设置mysql数据库的数据的存放目录 错误日志
+datadir=/usr/local/mysql/data
+tmpdir=/usr/local/mysql/temp
+pid-file=/usr/local/mysql/mysql.pid
+log-error=/usr/local/mysql/log/error.log
+socket=/usr/local/mysql/temp/mysql.sock
+
+#允许最大连接数
+max_connections=200
+
+
+#创建新表时将使用的默认存储引擎
+default-storage-engine=INNODB
+
+#此处是区分大写的，但是mysql8只有在初始化时设置lower_case_table_names=1才有效
+#lower_case_table_names=1
+max_allowed_packet=500M
+
+#取消binlog
+skip-log-bin
+
+#开启load file
+local-infile=1
+secure_file_priv=
+
+[client]
+socket=/usr/local/mysql/temp/mysql.sock
+```
+
+mysql.service
+
+```shell
+[Unit]
+Description=mysql service
+After=network.target
+
+[Service]
+User=mysql
+Group=mysql
+WorkingDirectory=/usr/local/mysql
+PrivateTmp=true
+Type=simple
+ExecStart=/usr/local/mysql/bin/mysqld --defaults-file=/etc/my.cnf
+ExecStop=/usr/bin/kill -15 $MAINPID
+Restart=always
+RestartSec=60
+StartLimitInterval=0
+
+[Install]
+WantedBy=multi-user.target
+
+```
+
+ln -s /usr/local/mysql/bin/mysql /usr/bin/mysql
 
 ### ubuntu 编译
 
