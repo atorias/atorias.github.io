@@ -29,3 +29,15 @@
 
 计算机\HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsUpdate\UX\Settings
 FlightSettingsMaxPauseDays DWORD32 十进制7000
+
+## 主动排除你选的范围，防止系统以后占用它
+
+```code
+
+# 查看端口
+netsh interface ipv4 show excludedportrange protocol=tcp
+
+# 设置端口
+netsh int ipv4 add excludedportrange protocol=tcp startport=60000 numberofports=50 store=persistent
+
+```
