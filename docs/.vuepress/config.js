@@ -55,12 +55,13 @@ export default defineUserConfig({
         ]
       },
       {
-        text: 'linux工具',
+        text: 'linux',
         children: [
           '/linux_tools/firewalld',
           '/linux_tools/nginx',
           '/linux_tools/systemctl',
           '/linux_tools/redis',
+          '/linux_tools/network',
         ]
       },
       {
