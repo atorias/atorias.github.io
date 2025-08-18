@@ -148,3 +148,5 @@ docker ps -a
 # 容器->镜像
 docker commit -a "author_name" -m "description" container_id imagename:tag
 ```
+
+## windows desktop 无法启动
