@@ -76,6 +76,7 @@ export default defineUserConfig({
         children:[
           '/tools/hashcat',
           '/tools/docker',
+          '/tools/nssm',
         ]
       },
       {
