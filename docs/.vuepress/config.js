@@ -83,7 +83,8 @@ export default defineUserConfig({
         text: '开发语言',
         children: [
           '/languages/php',
-          '/languages/assembly'
+          '/languages/assembly',
+          '/languages/go',
         ]
       }
     ]

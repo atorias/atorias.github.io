@@ -150,3 +150,8 @@ docker commit -a "author_name" -m "description" container_id imagename:tag
 ```
 
 ## windows desktop 无法启动
+
+```shell
+net stop winnat
+net start winnat 
+```
