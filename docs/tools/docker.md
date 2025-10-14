@@ -75,6 +75,10 @@ docker run -p 3306:3306 --name mysql8.3.0
 -v C:\Users\Administrator\Desktop\docker_data\mysql8.3.0/data:/var/lib/mysql 
 -e MYSQL_ROOT_PASSWORD=root 
 -d mysql:latest
+
+# 针对mysql9
+ALTER USER 'root'@'%' IDENTIFIED WITH caching_sha2_password BY 'root';
+FLUSH PRIVILEGES;
 ```
 
 ### ubuntu 20.04
