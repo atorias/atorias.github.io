@@ -25,7 +25,6 @@ export default defineUserConfig({
           '/foundation/regex',
           '/foundation/usb',
           '/foundation/vscode',
-          '/foundation/windows',
         ]
       },
       {
