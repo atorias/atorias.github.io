@@ -362,7 +362,7 @@ tar -zxvf 1.tar.gz -C /tmp
 ### 查看当前路径下所有目录的大小
 
 ```shell
-du -h /home --max-depth=1 | sort
+du -h --max-depth=1 / | sort -hr
 ```
 
 ### 查看磁盘、分区和卷组
