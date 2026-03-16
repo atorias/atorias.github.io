@@ -67,6 +67,8 @@ docker run -p 6379:6379 --name redis72
 
 ### mysql
 
+mysql8
+
 ```docker
 docker run -p 3306:3306 --name mysql8.3.0 
 -v C:\Users\Administrator\Desktop\docker_data\mysql8.3.0/mysql-files:/var/lib/mysql-files 
@@ -75,7 +77,27 @@ docker run -p 3306:3306 --name mysql8.3.0
 -v C:\Users\Administrator\Desktop\docker_data\mysql8.3.0/data:/var/lib/mysql 
 -e MYSQL_ROOT_PASSWORD=root 
 -d mysql:latest
+
+# 针对mysql9
+ALTER USER 'root'@'%' IDENTIFIED WITH caching_sha2_password BY 'root';
+FLUSH PRIVILEGES;
 ```
+
+mysql5.5
+
+```shell
+docker run -d --name mysql55 ^
+  -e MYSQL_ROOT_PASSWORD=root ^
+  -p 23309:3306 ^
+  -v C:\Users\Administrator\Desktop\docker_data\mysql55\data:/var/lib/mysql ^
+  -v C:\Users\Administrator\Desktop\docker_data\mysql55\conf:/etc/mysql ^
+  -v C:\Users\Administrator\Desktop\docker_data\mysql55\conf.d:/etc/mysql/conf.d ^
+  -v C:\Users\Administrator\Desktop\docker_data\mysql55\logs:/var/log/mysql ^
+  mysql:5.5
+
+```
+
+使用127.0.0.1连接
 
 ### ubuntu 20.04
 
@@ -147,4 +169,11 @@ networks:
 docker ps -a
 # 容器->镜像
 docker commit -a "author_name" -m "description" container_id imagename:tag
+```
+
+## windows desktop 无法启动
+
+```shell
+net stop winnat
+net start winnat 
 ```

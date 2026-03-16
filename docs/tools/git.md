@@ -44,3 +44,10 @@ git rm -r --cached .
 git add .
 git commit -m 'update .gitignore'
 ```
+
+## 推送一个版本
+
+```shell
+git tag -a v1.0-before-major-change -m "需求变更前最终版本"
+git push origin v1.0-before-major-change
+```

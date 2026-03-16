@@ -20,14 +20,11 @@ export default defineUserConfig({
         text: '基础知识',
         children: [
           '/foundation/character_set',
-          '/foundation/git',
           '/foundation/license',
           '/foundation/Linux',
-          '/foundation/markdown',
           '/foundation/regex',
           '/foundation/usb',
           '/foundation/vscode',
-          '/foundation/windows',
         ]
       },
       {
@@ -65,6 +62,13 @@ export default defineUserConfig({
         ]
       },
       {
+        text: 'windows',
+        children: [
+          '/windows/nssm',
+          '/windows/windows',
+        ]
+      },
+      {
         text: 'database',
         children: [
           '/database/mysql/mysql',
@@ -76,13 +80,16 @@ export default defineUserConfig({
         children:[
           '/tools/hashcat',
           '/tools/docker',
+          '/tools/git',
+          '/tools/markdown',
         ]
       },
       {
         text: '开发语言',
         children: [
           '/languages/php',
-          '/languages/assembly'
+          '/languages/assembly',
+          '/languages/go',
         ]
       }
     ]
