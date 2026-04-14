@@ -74,6 +74,33 @@ location /12001/ {
 }
 ```
 
+```shell
+# 转发设置
+location /zcsh/ {
+    # 预检
+    if ($request_method = 'OPTIONS') {
+        add_header 'Access-Control-Allow-Origin' $http_origin;
+        add_header 'Access-Control-Allow-Methods' 'GET,POST,PUT,DELETE,OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Authorization,Content-Type';
+        add_header 'Access-Control-Allow-Credentials' 'true';
+        add_header 'Content-Length' 0;
+        add_header 'Content-Type' text/plain;
+        return 204;
+    }
+
+    # 所有真实请求都带 CORS 头
+    add_header 'Access-Control-Allow-Origin' $http_origin always;
+    add_header 'Access-Control-Allow-Credentials' 'true' always;
+
+    proxy_pass http://10.25.29.151:12001/;
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
 ## 需要阅读的文档
 
 [nginx](https://nginx.org/en/docs/)

@@ -177,3 +177,22 @@ docker commit -a "author_name" -m "description" container_id imagename:tag
 net stop winnat
 net start winnat 
 ```
+
+## 导出导入数据库
+
+```shell
+# 导出数据库
+docker exec container_name \
+  mysqldump -uroot -proot \
+  --all-databases \
+  --single-transaction \
+  --hex-blob \
+  --routines \
+  --events \
+  > all.sql
+# 导入数据库
+docker exec -i container_name \
+  mysql -uroot -proot \
+  --default-character-set=utf8mb4 \
+  < all.sql
+```
