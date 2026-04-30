@@ -359,12 +359,6 @@ tar -zxvf 1.tar.gz -C /tmp
 
 ## 其他操作
 
-### 查看当前路径下所有目录的大小
-
-```shell
-du -h --max-depth=1 / | sort -hr
-```
-
 ### 查看磁盘、分区和卷组
 
 ```shell
@@ -394,4 +388,16 @@ find /data/images/shebao -type f -newermt "2000-01-01" ! -newermt "2020-01-01" -
 
 ```shell
 find /data/images/shebao -type f -newermt "2000-01-01" ! -newermt "2020-01-01" -exec mv {} /home/tmp/shebao-before-2020 \;
+```
+
+### 磁盘满了
+
+```shell
+# 根目录执行
+du -sh /* 2>/dev/null | sort -hr | head -n 10
+# 最大的那个文件夹
+ls -lhS /tmp | head -n 20
+# 查看所有目录的大小
+du -h --max-depth=1 / | sort -hr
+
 ```
